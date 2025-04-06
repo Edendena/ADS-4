@@ -1,5 +1,6 @@
 // Copyright 2021 NNTU-CS
 #include <algorithm>
+#include <unordered_map>
 int countPairs1(int *arr, int len, int value) {
   int count = 0;
   for (int i = 0; i < len; ++i) {
@@ -13,48 +14,43 @@ int countPairs1(int *arr, int len, int value) {
 }
 
 int countPairs2(int *arr, int len, int value) {
+std::sort(arr, arr + len);
   int count = 0;
   int left = 0;
   int right = len - 1;
-
-  while (left < right) {
-    int sum = arr[left] + arr[right];
-    if (sum == value) {
-      count++;
-      left++;
-      right--;
-      while (left < right && arr[left] == arr[left - 1]) left++;
-      while (left < right && arr[right] == arr[right + 1]) right--;
-    } else if (sum < value) {
-      left++;
-    } else {
-      right--;
-    }
+  int leftCount = 1, rightCount = 1;
+  while (left + 1 < right && arr[left] == arr[left + 1]) {
+    left++;
+    leftCount++;
   }
-  return count;
+  while (right - 1 > left && arr[right] == arr[right - 1]) {
+    right--;
+    rightCount++;
+  }
+  count += leftCount * rightCount;
+  left++;
+  right--;
+}
+} else if (sum < value) {
+  left++;
+} else {
+  right--;
+}
+return count;
 }
 
 int countPairs3(int *arr, int len, int value) {
+  std::unordered_map<int, int> freq;
   int count = 0;
 
   for (int i = 0; i < len; ++i) {
     int complement = value - arr[i];
-    int left = i + 1;
-    int right = len - 1;
-
-    while (left <= right) {
-      int mid = left + (right - left) / 2;
-      if (arr[mid] == complement) {
-        count++;
-        break;
-      } else if (arr[mid] < complement) {
-        left = mid + 1;
-      } else {
-        right = mid - 1;
-      }
+    if (freq.find(complement) != freq.end()) {
+      count += freq[complement];
     }
-    while (i + 1 < len && arr[i] == arr[i + 1]) i++;
+    freq[arr[i]]++;
   }
+
   return count;
 }
 
